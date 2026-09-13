@@ -1331,9 +1331,5 @@ static void bundleLoaded(CFNotificationCenterRef center, void *observer, CFStrin
 			%init(safetyChecksFailed);
 		}
 	}
-	else {
-		// Credits to Silo for this: https://github.com/ioscreatix/Silo/blob/master/Tweak.xm
-		// Register for bundle load notification, this allows us to initialize hooks for classes that are loaded from bundles at runtime
-		CFNotificationCenterAddObserver(CFNotificationCenterGetLocalCenter(), NULL, bundleLoaded, (CFStringRef)NSBundleDidLoadNotification, NULL, CFNotificationSuspensionBehaviorCoalesce);
-	}
+	// 非 SpringBoard（Preferences 等）不注入：避免与 OneSettings 等设置类插件冲突导致设置闪退
 }
