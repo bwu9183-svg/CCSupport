@@ -1,4 +1,26 @@
-#import <libroot.h>
+// 不用 roothide 的 libroot.h（编译环境无此头），自行解析 jbroot 前缀
+#import <Foundation/Foundation.h>
+
+static NSString *_jbrootPath = nil;
+static inline NSString *JBROOT_PATH_NSSTRING(NSString *path) {
+    if (!_jbrootPath) {
+        NSFileManager *fm = [NSFileManager defaultManager];
+        if ([fm fileExistsAtPath:@"/var/jb"]) {
+            _jbrootPath = @"/var/jb";
+        } else {
+            NSString *dir = @"/var/containers/Bundle/Application";
+            for (NSString *sub in [fm contentsOfDirectoryAtPath:dir error:nil]) {
+                if ([sub hasPrefix:@".jbroot-"]) {
+                    _jbrootPath = [dir stringByAppendingPathComponent:sub];
+                    break;
+                }
+            }
+        }
+        if (!_jbrootPath) _jbrootPath = @"";
+    }
+    if ([path hasPrefix:@"/"]) return [_jbrootPath stringByAppendingString:path];
+    return path;
+}
 
 #define DefaultModuleConfigurationPath @"/var/mobile/Library/ControlCenter/ModuleConfiguration.plist"
 #define CCSupportModuleConfigurationPath JBROOT_PATH_NSSTRING(@"/var/mobile/Library/ControlCenter/ModuleConfiguration_CCSupport.plist")
