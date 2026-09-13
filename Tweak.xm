@@ -1297,7 +1297,7 @@ void initControlCenterSettingsHooks()
 	%init(ControlCenterSettings_Shared, SettingsControllerSharedAcrossVersions=settingsControllerClass);
 }
 
-static void bundleLoaded(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo)
+static __attribute__((unused)) void bundleLoaded(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo)
 {
 	NSBundle *bundle = (__bridge NSBundle *)(object);
 
