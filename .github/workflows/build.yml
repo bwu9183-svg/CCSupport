@@ -1,0 +1,60 @@
+name: Build CCSupport
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: brew install make dpkg ldid xz
+
+      - name: Set THEOS
+        run: |
+          echo "THEOS=$HOME/theos" >> $GITHUB_ENV
+          echo "$HOME/theos/bin" >> $GITHUB_PATH
+
+      - name: Install Theos
+        run: |
+          rm -rf "$HOME/theos"
+          git clone --recursive https://github.com/roothide/theos.git "$HOME/theos"
+
+      - name: Install iPhoneOS 16.5 SDK
+        run: |
+          set -e
+          rm -rf /tmp/theos-sdks
+          mkdir -p "$HOME/theos/sdks"
+          git clone --depth=1 --filter=blob:none --sparse \
+            https://github.com/theos/sdks.git /tmp/theos-sdks
+          cd /tmp/theos-sdks
+          git sparse-checkout set iPhoneOS16.5.sdk
+          cp -R iPhoneOS16.5.sdk "$HOME/theos/sdks/"
+
+      - name: Build RootHide
+        run: |
+          set -e
+          mkdir -p out
+          THEOS_PACKAGE_SCHEME=roothide make clean
+          THEOS_PACKAGE_SCHEME=roothide make package FINALPACKAGE=1
+          DEB=$(find packages -maxdepth 1 -type f -name "*.deb" | head -n 1)
+          cp "$DEB" out/build_CCSupport-roothide.deb
+
+      - name: Build Rootless
+        run: |
+          set -e
+          rm -rf packages .theos
+          THEOS_PACKAGE_SCHEME=rootless make clean
+          THEOS_PACKAGE_SCHEME=rootless make package FINALPACKAGE=1
+          DEB=$(find packages -maxdepth 1 -type f -name "*.deb" | head -n 1)
+          cp "$DEB" out/build_CCSupport-rootless.deb
+
+      - name: Upload DEB packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: CCSupport-debs
+          path: out/*.deb
