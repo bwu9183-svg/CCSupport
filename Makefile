@@ -9,9 +9,9 @@ INSTALL_TARGET_PROCESSES = SpringBoard Preferences
 include $(THEOS)/makefiles/common.mk
 
 TWEAK_NAME = CCSupport
-CCSupport_CFLAGS = -fobjc-arc
+CCSupport_CFLAGS = -fobjc-arc -I$(THEOS_PROJECT_DIR)/include
 CCSupport_FILES = $(wildcard *.xm *.m)
-CCSupport_PRIVATE_FRAMEWORKS = MobileIcons Preferences
+CCSupport_PRIVATE_FRAMEWORKS = MobileIcons Preferences ControlCenterUI ControlCenterServices ControlCenterUIKit
 
 ifneq ($(THEOS_PACKAGE_SCHEME),rootless)
 CCSupport_CFLAGS += -D XINA_SUPPORT=1
